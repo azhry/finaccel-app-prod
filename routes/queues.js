@@ -10,7 +10,7 @@ if (process.env.MODE && process.env.MODE === 'production') {
             port: 30069,
             host: 'ec2-3-210-34-241.compute-1.amazonaws.com',
             auth: 'pcf4d560cccf15e9a487097fec2cbcef748eb8e9712556323f79d936ea999aa0b',
-            db: 3, // if provided select a non-default redis db
+            db: 1, // if provided select a non-default redis db
             options: {
                 // see https://github.com/mranney/node_redis#rediscreateclient
             }
