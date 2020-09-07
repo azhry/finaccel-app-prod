@@ -14,6 +14,7 @@ router.get('/avg-salaries', async (req, res) => {
     let conn;
     try {
         conn = await pool.getConnection();
+        const r = await conn.query(`SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));`);
         const response = await conn.query(`
             SELECT AVG(A.salary) AS avg_salary, C.title
             FROM ${dbname}.salaries A
@@ -26,7 +27,7 @@ router.get('/avg-salaries', async (req, res) => {
             AND A.to_date = B.to_date
             JOIN ${dbname}.titles C 
             ON A.emp_no = C.emp_no
-            GROUP BY C.title
+            GROUP BY C.title;
         `);
         conn.end();
         res.send(response);
