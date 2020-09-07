@@ -7,8 +7,6 @@ const generateEmployeeAbsences = require('../scripts/employee-absence');
 const generateEmployeeLeaves = require('../scripts/employee-leaves');
 const updateEmployeeSalaries = require('../scripts/employee-salary');
 
-// https://stackoverflow.com/questions/37559610/socket-io-emit-on-express-route
-
 router.get('/enqueue', (req, res) => {
     queue
         .create('employee-absences', { title: 'Generate Employee Absences' })

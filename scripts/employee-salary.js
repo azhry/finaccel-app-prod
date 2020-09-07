@@ -2,9 +2,9 @@ const mariadb = require('mariadb');
 const Stream = require('stream');
 
 const pool = mariadb.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: '',
+    host: process.env.MODE && process.env.MODE == 'production' ? process.env.DBHOST : 'locahost',
+    user: process.env.MODE && process.env.MODE == 'production' ? process.env.DBUSER : 'root',
+    password: process.env.MODE && process.env.MODE == 'production' ? process.env.DBPASS : '',
     connectionLimit: 5
 });
 
