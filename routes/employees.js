@@ -8,21 +8,23 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
+const dbname = process.env.MODE && process.env.MODE == 'production' ? 'heroku_381d861d98245e3' : 'employees';
+
 router.get('/avg-salaries', async (req, res) => {
     let conn;
     try {
         conn = await pool.getConnection();
         const response = await conn.query(`
             SELECT AVG(A.salary) AS avg_salary, C.title
-            FROM employees.salaries A
+            FROM ${dbname}.salaries A
             JOIN (
                 SELECT emp_no, salary, MAX(to_date) AS to_date
-                FROM employees.salaries 
+                FROM ${dbname}.salaries 
                 GROUP BY emp_no    
             ) B
             ON A.emp_no = B.emp_no 
             AND A.to_date = B.to_date
-            JOIN employees.titles C 
+            JOIN ${dbname}.titles C 
             ON A.emp_no = C.emp_no
             GROUP BY C.title
         `);
@@ -44,8 +46,8 @@ router.get('/avg-ages', async (req, res) => {
         conn = await pool.getConnection();
         const response = await conn.query(`
             SELECT B.title, AVG(TIMESTAMPDIFF(year, A.birth_date, NOW())) AS avg_age
-            FROM employees.employees A
-            JOIN employees.titles B 
+            FROM ${dbname}.employees A
+            JOIN ${dbname}.titles B 
             ON A.emp_no = B.emp_no
             GROUP BY B.title
         `);
@@ -66,7 +68,7 @@ router.get('/avg-age', async (req, res) => {
         conn = await pool.getConnection();
         const response = await conn.query(`
             SELECT emp_no, birth_date, AVG(TIMESTAMPDIFF(year, birth_date, NOW())) AS avg_age
-            FROM employees.employees
+            FROM ${dbname}.employees
         `);
         conn.end();
         res.send(response);

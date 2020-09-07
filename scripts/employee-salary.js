@@ -8,6 +8,8 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
+const dbname = process.env.MODE && process.env.MODE == 'production' ? 'heroku_381d861d98245e3' : 'employees';
+
 const getBreakTimeSalaryIncrement = avgBreakTime => {
     if (avgBreakTime > 60) {
         return -1.0;
@@ -60,24 +62,24 @@ module.exports = async function employeesStream(cb, processCb = () => {}) {
                             CASE
                                 WHEN DATE(C.start_date) IN (
                                     SELECT DATE(start_date)
-                                    FROM employees.daily_employee_leaves D
+                                    FROM ${dbname}.daily_employee_leaves D
                                     WHERE D.emp_no = C.emp_no
                                     AND D.type = 'Unpaid'
                                 ) THEN 0
                                 ELSE (TIMESTAMPDIFF(second, C.start_date, C.end_date) / 3600)
                             END
                         ) AS avg_working_hours
-                    FROM employees.daily_employee_absences C
+                    FROM ${dbname}.daily_employee_absences C
                     WHERE C.emp_no = A.emp_no
                 ) AS avg_working_hours,
                 (
                     SELECT 
                         AVG(break_time) AS avg_break_time
-                    FROM employees.daily_employee_absences C
+                    FROM ${dbname}.daily_employee_absences C
                     WHERE C.emp_no = A.emp_no
                 ) AS avg_break_time
-            FROM employees.employees A
-            LEFT JOIN employees.titles B 
+            FROM ${dbname}.employees A
+            LEFT JOIN ${dbname}.titles B 
             ON A.emp_no = B.emp_no
         `);
 
@@ -99,7 +101,7 @@ module.exports = async function employeesStream(cb, processCb = () => {}) {
                 percentageSalaryIncrement += getBreakTimeSalaryIncrement(chunk.avg_break_time);
 
                 await conn2.query(`
-                    UPDATE employees.salaries 
+                    UPDATE ${dbname}.salaries 
                     SET salary = (
                         CASE
                             WHEN ((salary + ((${percentageSalaryIncrement} / 100) * salary)) - salary + ${defaultTitleSalaryIncrement}) > 2000 

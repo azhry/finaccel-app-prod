@@ -13,6 +13,8 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
+const dbname = process.env.MODE && process.env.MODE == 'production' ? 'heroku_381d861d98245e3' : 'employees';
+
 const leaveTypes = ['Annual', 'Maternity', 'Sick', 'Unpaid'];
 
 module.exports = async function employeesStream(cb, processCb = () => {}) {
@@ -20,7 +22,7 @@ module.exports = async function employeesStream(cb, processCb = () => {}) {
     try {
         conn = await pool.getConnection();
 
-        const queryStream = await conn.queryStream('SELECT emp_no, hire_date, gender FROM employees.employees');
+        const queryStream = await conn.queryStream(`SELECT emp_no, hire_date, gender FROM ${dbname}.employees`);
 
         let numEmployeesProcessed = 0;
         const transformStream = new Stream.Transform({
@@ -61,7 +63,7 @@ module.exports = async function employeesStream(cb, processCb = () => {}) {
     
                     conn.beginTransaction();
                     try {
-                        await conn.batch('INSERT INTO employees.daily_employee_leaves(emp_no, start_date, end_date, type) VALUES(?, ?, ?, ?)', batch);
+                        await conn.batch(`INSERT INTO ${dbname}.daily_employee_leaves(emp_no, start_date, end_date, type) VALUES(?, ?, ?, ?)`, batch);
                         conn.commit();
                     }
                     catch (err) {
