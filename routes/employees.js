@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const mariadb = require('mariadb');
 const pool = mariadb.createPool({
-    host: process.env.MODE && process.env.MODE == 'production' ? process.env.DBHOST : 'locahost',
+    host: process.env.MODE && process.env.MODE == 'production' ? process.env.DBHOST : 'localhost',
     user: process.env.MODE && process.env.MODE == 'production' ? process.env.DBUSER : 'root',
     password: process.env.MODE && process.env.MODE == 'production' ? process.env.DBPASS : '',
     connectionLimit: 5
