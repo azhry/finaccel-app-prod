@@ -13,7 +13,7 @@ const pool = mariadb.createPool({
     connectionLimit: 5
 });
 
-const dbname = process.env.MODE && process.env.MODE == 'production' ? 'heroku_381d861d98245e3' : 'employees';
+const dbname = process.env.MODE && process.env.MODE == 'production' ? 'employees' : 'employees';
 
 module.exports = async function employeesStream(cb, processCb = () => {}) {
     let conn;
